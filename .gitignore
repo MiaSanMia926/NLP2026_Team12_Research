@@ -1,0 +1,24 @@
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# Python environments and caches
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Office temporary files and OS metadata
+~$*
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Downloaded model weights
+*.safetensors
+*.ckpt
+*.pt
+*.pth
