@@ -3,6 +3,11 @@
 .env.*
 !.env.example
 
+# Local project planning documents
+/NLP_Research_Topic_and_Innovations.md
+/分工.md
+/自然语言处理课程大作业要求.docx
+
 # Python environments and caches
 __pycache__/
 *.py[cod]
