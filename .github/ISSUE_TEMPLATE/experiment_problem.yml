@@ -1,0 +1,35 @@
+name: 实验问题与配置变更
+description: 记录数据、方法、指标或执行问题及受影响结果
+title: "[实验问题] 简要说明"
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 问题和复现证据
+      description: 附脱敏日志、最小样例、期望与实际行为；不要放密钥
+    validations:
+      required: true
+  - type: textarea
+    id: versions
+    attributes:
+      label: 版本与受影响范围
+      description: commit、数据/split/config 哈希、run_id、方法、模型、条件、表图
+    validations:
+      required: true
+  - type: dropdown
+    id: test_seen
+    attributes:
+      label: 是否已查看正式 test 输出
+      options:
+        - 尚未查看
+        - 已查看
+        - 待核实
+    validations:
+      required: true
+  - type: textarea
+    id: resolution
+    attributes:
+      label: 解决方案、重跑影响和复核人
+      description: 冻结后变更需保留旧版本、更新决策记录、重跑受影响配对并同步报告
+    validations:
+      required: true

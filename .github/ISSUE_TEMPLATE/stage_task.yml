@@ -1,0 +1,44 @@
+name: 阶段任务与交接
+description: 明确本阶段负责人、交付物、依赖与验收
+title: "[S0][角色] 具体任务名称"
+body:
+  - type: input
+    id: owner
+    attributes:
+      label: 负责人和角色
+      description: 填实际姓名/账号及 A–E 角色；账号确定后再指派 assignee
+    validations:
+      required: true
+  - type: input
+    id: deadline
+    attributes:
+      label: 阶段和截止时间
+      placeholder: "S0 / 2026-10-23，北京时间"
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: 任务与交付物
+      description: 写清要完成什么、提交到哪些模块文件；评审或运行任务可无新增代码
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: 上游依赖与下游交接
+      description: 需要谁的输入、依赖哪个 Issue/schema，以及交给谁使用
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 验收标准与复核人
+      description: 写可检查的完成条件和交叉复核人，不只写“已上传”
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 实际完成证据与阻塞
+      description: 完成后补 PR、文件、run_id、复核记录；未完成如实更新状态

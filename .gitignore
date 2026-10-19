@@ -27,3 +27,11 @@ Thumbs.db
 *.ckpt
 *.pt
 *.pth
+
+# Local rendering intermediates
+.proposal_render/
+
+# Large local experiment logs and caches (publish indexes instead)
+artifacts/raw/
+runs/raw/
+.cache/
