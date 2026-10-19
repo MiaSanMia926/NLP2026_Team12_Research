@@ -1,0 +1,1 @@
+{"schema_version": "1.0", "input_id": "SOFTWARE_FIXTURE_INPUT", "base_question_id": "fixture_q1", "question": "Which fictional token is named in the supplied statement?", "evidence": [{"evidence_id": "e01", "text": "The fictional token is alpha.", "visible_metadata": {"source_id": "s01", "url": null, "published_at": null, "reprint_of": null}}]}
