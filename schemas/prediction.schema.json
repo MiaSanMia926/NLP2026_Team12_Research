@@ -1,0 +1,303 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Reviewed prediction contract 1.0",
+  "type": "object",
+  "required": [
+    "run_id",
+    "base_question_id",
+    "family_id",
+    "dataset_id",
+    "dataset_version",
+    "dataset_hash",
+    "split_hash",
+    "experiment_id",
+    "config_hash",
+    "model",
+    "model_revision",
+    "method",
+    "condition_id",
+    "pair_id",
+    "raw_log_id",
+    "schema_version",
+    "split",
+    "task_type",
+    "status",
+    "length_policy",
+    "replica_condition",
+    "metadata_state",
+    "metadata_error_type",
+    "answered",
+    "should_answer",
+    "correct",
+    "prediction",
+    "candidate_answer",
+    "candidate_task_correct",
+    "selection_score",
+    "references",
+    "seed",
+    "position_seed"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "base_question_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "family_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dataset_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dataset_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dataset_hash": {
+      "type": "string",
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "split_hash": {
+      "type": "string",
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "experiment_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "config_hash": {
+      "type": "string",
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "method": {
+      "type": "string",
+      "minLength": 1
+    },
+    "condition_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pair_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "raw_log_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema_version": {
+      "type": "string",
+      "enum": [
+        "1.0"
+      ]
+    },
+    "split": {
+      "type": "string",
+      "enum": [
+        "train",
+        "dev",
+        "test"
+      ]
+    },
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "evidence_constrained_qa",
+        "factual_qa"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ok",
+        "api_error",
+        "parse_error",
+        "blocked_budget",
+        "blocked_input"
+      ]
+    },
+    "length_policy": {
+      "type": "string",
+      "enum": [
+        "natural_length",
+        "fixed_token_budget"
+      ]
+    },
+    "replica_condition": {
+      "type": "string",
+      "enum": [
+        "no_replica",
+        "same_source_replica",
+        "independent_support",
+        "complementary_support"
+      ]
+    },
+    "metadata_state": {
+      "type": "string",
+      "enum": [
+        "complete",
+        "missing",
+        "incorrect"
+      ]
+    },
+    "metadata_error_type": {
+      "type": "string",
+      "enum": [
+        "none",
+        "split_same_source",
+        "merge_independent_sources"
+      ]
+    },
+    "answered": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "should_answer": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "correct": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "prediction": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "candidate_answer": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "candidate_task_correct": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "candidate_factual_correct": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "selection_score": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "position_seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "answer_supported": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "citation_correct": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "citation_labels": {
+      "type": "array",
+      "items": {
+        "type": "boolean"
+      }
+    },
+    "cited_evidence_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "gold_independent_support_groups": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "retained_independent_support_groups": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "input_tokens": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "output_tokens": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "calls": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "latency_seconds": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    }
+  },
+  "additionalProperties": true
+}
