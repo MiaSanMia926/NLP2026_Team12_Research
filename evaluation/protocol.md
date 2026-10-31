@@ -43,6 +43,8 @@ dev 冻结阈值决定实际 operating point；test 排序曲线是描述性诊�
 
 默认按数据/version、任务、split、模型/revision、长度、seed、experiment_id、方法/config_hash、条件、metadata 状态/错误子类、位置种子多键分组，不产生池化主结果。
 
+2026-10-30 补充：数据和 split 的 SHA256 也参与切片，不能只凭同一版本名混合不同内容；bootstrap 禁止跨位置种子池化。report 按条件输出主表，另合并同题两复本条件计算复本诊断。
+
 预定主比较 B7−B5。按基础问题 paired cluster bootstrap：2,000 次、seed=20261019、95% percentile CI。同题所有条件随抽样，两方法共用抽样；重复抽中时重命名临时 base/pair ID。
 
 双方条件矩阵不齐或重复直接报错。执行失败导致排除时列出基础题 ID，不挑有利成功子集。无定义 replicate 不填零，报告有效数；无定义超过 5% 附区间不稳定提示。正式主表按条件切片，跨条件汇总须另作预声明。
@@ -56,3 +58,5 @@ scheduler 只列逻辑任务，不调用模型、不拟合门控、不产生实�
 A 需提供题目、划分与可信标签；B 提供候选/得分、门控权重及阈值；D 提供原始调用和人工引用审查。examples 仅作软件核验，不能写入论文实验结果。
 
 真实汇总须覆盖所选 manifest 的全部 run：失败和未完成不得无声省略。metrics 的 --manifest 可核对 ID 和版本；不提供 manifest 时，planned_n 只表示当前输入记录数。
+
+report 还列出 missing/extra/blocked run ID，保存诊断并返回非零；不会自动构造未运行预测。输出包不得覆盖非空旧目录。默认 B7−B5，显式 --compare 可定义探索性消融比较。software-selfcheck/pilot/frozen-test 标签均为调用者声明，须与原始数据/运行/冻结记录核对。

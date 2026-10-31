@@ -47,3 +47,9 @@ missing 保留 unknown；incorrect 预定义同源拆分/独立误合并及实�
 A/D 对至少 50 个基础题或小集合全量双人独立复核，保留一致率和裁决。输出引用审查另外绑定 run_id，不从 EM 推断证据支持。每张图表保留数据、配置、代码与日志来源，开源/AI 用途如实披露。
 
 examples 和软件测试不得混入真实结果，研究结论只来自真实、冻结、可复核输出。
+
+## 2026-10-30 执行入口补充
+
+`python -m evaluation.report` 按数据及 split 哈希和既定条件切片输出主表，默认逐条件估计 B7−B5 的 coverage、selective risk、EM、完整 AURC 差值/CI，并单独在两复本面板估计 decision/normalized-answer change rate 差值。单条件主表 valid_pairs=0 不表示整个数据没有复本配对，应查看 replica.json。
+
+方法不配对、重复条件或混配置时不计算该面板比较，并列原因；执行失败排除列 ID。三种消融的 method ID、独立校准与比较方向见 docs/ablations.md。这里只落实原协议，不宣告团队已完成科学签收或已经查看/冻结 test。

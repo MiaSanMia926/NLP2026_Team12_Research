@@ -46,7 +46,7 @@ def paired_bootstrap(rows, method_a="B7", method_b="B5", metric="selective_risk"
     rows = [r for r in rows if r["method"] in {method_a, method_b}]
     if not rows:
         raise ValueError("no selected methods")
-    for field in SLICE_FIELDS:
+    for field in SLICE_FIELDS + ("position_seed",):
         if len({r.get(field) for r in rows}) != 1:
             raise ValueError(f"mixed {field}; filter to one comparable slice first")
     for method in (method_a, method_b):
