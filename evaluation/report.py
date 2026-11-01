@@ -118,7 +118,7 @@ def sha256(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def build_report(input_path, output, manifest=None, pairs=None, replicates=2000, seed=20261019, label="software-selfcheck", figures=False):
+def build_report(input_path, output, manifest=None, pairs=None, replicates=2000, seed=20261019, label="software-selfcheck", figures=False, figure_style="journal"):
     if replicates < 1 or seed < 0:
         raise ValueError("positive replicates and nonnegative seed required")
     if label not in {"software-selfcheck", "pilot", "frozen-test"}:
@@ -148,7 +148,7 @@ def build_report(input_path, output, manifest=None, pairs=None, replicates=2000,
             curve = risk_curve(group, mode)
             curve_audit.append(dict(context, curve_mode=mode, available=curve["available"], reason=curve["reason"], max_coverage=curve["max_coverage"]))
             curves.extend(dict(context, curve_mode=mode, **p) for p in curve["points"])
-            if mode == "candidate" and curve["available"]:
+            if mode == "candidate":
                 plot_data.append((context, curve))
     replicas = [{"slice": context, "metrics": summarize(group)["replica"]}
                 for context, group in group_rows([r for r in rows if r["replica_condition"] in {"no_replica", "same_source_replica"}], REPLICA_FIELDS)]
@@ -166,12 +166,12 @@ def build_report(input_path, output, manifest=None, pairs=None, replicates=2000,
     write_json(output / "failures.json", [{k: r[k] for k in ("run_id", "raw_log_id", "base_question_id", "method", "status")} for r in rows if r["status"] != "ok"])
     figure_status = "not_requested"
     if figures:
-        figure_status = render_figures(output, plot_data, label)
+        figure_status = render_figures(output, plot_data, label, rows, figure_style)
     provenance = {"label": label, "input": str(input_path.resolve()), "input_sha256": sha256(input_path),
                   "manifest": str(manifest.resolve()) if manifest else None,
                   "manifest_sha256": sha256(manifest) if manifest else None,
                   "replicates": replicates, "bootstrap_seed": seed, "comparisons": pairs,
-                  "python": sys.version, "figure_status": figure_status,
+                  "python": sys.version, "figure_status": figure_status, "figure_style": figure_style,
                   "code_sha256": {p.name: sha256(p) for p in sorted(Path(__file__).parent.glob("*.py"))},
                   "schema_sha256": {p.name: sha256(p) for p in sorted((Path(__file__).parent.parent / "schemas").glob("*.json"))},
                   "note": "Labels are supplied by the caller and are not evidence of team approval or actual model execution."}
@@ -189,39 +189,12 @@ def build_report(input_path, output, manifest=None, pairs=None, replicates=2000,
     return {"output": str(output), "records": len(rows), "manifest_status": audit["status"], "figure_status": figure_status}
 
 
-def render_figures(output, curves, label):
+def render_figures(output, curves, label, rows=None, figure_style="journal"):
     try:
-        import matplotlib
-        matplotlib.use("Agg")
-        import matplotlib.pyplot as plt
+        from .publication import render_report_figures
+        return render_report_figures(output, curves, label, rows, style=figure_style)
     except ImportError:
         return "unavailable_matplotlib"
-    # One image per comparable condition, avoiding overlaying unrelated conditions.
-    groups = defaultdict(list)
-    for context, curve in curves:
-        key = tuple(context[k] for k in COMPARISON_FIELDS)
-        groups[key].append((context, curve))
-    figure_index = []
-    for key, group in groups.items():
-        fig, ax = plt.subplots(figsize=(7, 4.5), constrained_layout=True)
-        for context, curve in group:
-            points = curve["points"][1:]
-            ax.step([0.0]+[p["coverage"] for p in points], [points[0]["risk"]]+[p["risk"] for p in points],
-                    where="pre", label=f"{context['method']} {context['config_hash'][:8]}")
-        panel_label = f"{context['metadata_state']} / {context['replica_condition']} / {context['length_policy']}"
-        ax.set(xlim=(0,1), ylim=(0,1), xlabel="Coverage of successful predictions", ylabel="Risk")
-        ax.set_title(panel_label, fontsize=10)
-        ax.text(.98, .04, label, transform=ax.transAxes, ha="right", va="bottom", fontsize=9,
-                bbox={"facecolor": "white", "alpha": .9, "edgecolor": "0.8"})
-        ax.legend(fontsize=7)
-        ax.grid(alpha=.25)
-        name = "rc_" + hashlib.sha256(repr(key).encode()).hexdigest()[:12] + ".svg"
-        fig.savefig(output / name)
-        fig.savefig(output / name.replace(".svg", ".png"), dpi=160)
-        figure_index.append({"svg": name, "png": name.replace(".svg", ".png"), "slice": dict(zip(COMPARISON_FIELDS, key))})
-        plt.close(fig)
-    write_json(output / "figure_index.json", figure_index)
-    return f"generated_{len(groups)}_svg_png_pairs"
 
 
 def main():
@@ -234,6 +207,7 @@ def main():
     parser.add_argument("--seed", type=int, default=20261019)
     parser.add_argument("--label", choices=["software-selfcheck", "pilot", "frozen-test"], default="software-selfcheck")
     parser.add_argument("--figures", action="store_true")
+    parser.add_argument("--figure-style", choices=["journal", "minimal", "warm", "monochrome"], default="journal")
     args = parser.parse_args()
     try:
         pairs = None
@@ -243,7 +217,7 @@ def main():
                 if pair.count(":") != 1:
                     raise ValueError("--compare requires A:B")
                 pairs.append(tuple(pair.split(":")))
-        result = build_report(args.input, args.output_dir, args.manifest, pairs, args.replicates, args.seed, args.label, args.figures)
+        result = build_report(args.input, args.output_dir, args.manifest, pairs, args.replicates, args.seed, args.label, args.figures, args.figure_style)
     except (ValueError, OSError, KeyError, TypeError) as exc:
         print(str(exc), file=sys.stderr)
         return 2
