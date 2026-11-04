@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Question registry, not model input",
+  "type": "object",
+  "required": [
+    "base_question_id",
+    "family_id",
+    "dataset_id",
+    "dataset_version",
+    "dataset_hash",
+    "split_hash",
+    "split",
+    "task_type"
+  ],
+  "properties": {
+    "base_question_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "family_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dataset_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dataset_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dataset_hash": {
+      "type": "string",
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "split_hash": {
+      "type": "string",
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "split": {
+      "type": "string",
+      "enum": [
+        "train",
+        "dev",
+        "test"
+      ]
+    },
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "evidence_constrained_qa",
+        "factual_qa"
+      ]
+    },
+    "incorrect_metadata_error_type": {
+      "type": "string",
+      "enum": [
+        "split_same_source",
+        "merge_independent_sources"
+      ]
+    }
+  },
+  "additionalProperties": true
+}

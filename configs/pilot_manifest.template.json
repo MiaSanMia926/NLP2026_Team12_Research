@@ -1,0 +1,17 @@
+{
+  "experiment_id": "",
+  "model": "",
+  "model_revision": "",
+  "prompt_template_hash": "",
+  "tokenizer_id": "",
+  "generation": {"temperature": 0},
+  "seed": 20261019,
+  "position_seed": 0,
+  "fixed_token_budget": null,
+  "method_configs": {
+    "B7": {"gate": {"fit_split": "train", "calibration_split": "dev", "artifact_hash": null, "threshold": null}},
+    "B7_no_source": {"disabled_features": ["source"], "gate": {"fit_split": "train", "calibration_split": "dev", "artifact_hash": null, "threshold": null}},
+    "B7_no_unknown": {"disabled_features": ["unknown"], "gate": {"fit_split": "train", "calibration_split": "dev", "artifact_hash": null, "threshold": null}},
+    "B7_no_conflict": {"disabled_features": ["conflict"], "gate": {"fit_split": "train", "calibration_split": "dev", "artifact_hash": null, "threshold": null}}
+  }
+}
