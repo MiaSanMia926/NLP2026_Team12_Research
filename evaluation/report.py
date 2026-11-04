@@ -10,7 +10,8 @@ from collections import defaultdict
 from pathlib import Path
 
 from .bootstrap import paired_bootstrap
-from .metrics import GROUP_FIELDS, check_manifest, grouped_summaries, load_jsonl, risk_curve, summarize
+from .manifest import audit_manifest
+from .metrics import GROUP_FIELDS, grouped_summaries, load_jsonl, risk_curve, summarize
 
 COMPARISON_FIELDS = tuple(k for k in GROUP_FIELDS if k not in {"method", "config_hash"})
 REPLICA_FIELDS = tuple(k for k in GROUP_FIELDS if k not in {"condition_id", "replica_condition"})
@@ -90,30 +91,6 @@ def compare(rows, method_a, method_b, replicates, seed, replica=False):
     return results
 
 
-def audit_manifest(rows, path):
-    if path is None:
-        return {"checked": False, "status": "unverified", "note": "planned_n counts supplied records only"}
-    records = [json.loads(line) for line in path.read_text(encoding="utf-8-sig").splitlines() if line.strip()]
-    if not records or any(not isinstance(r, dict) or not isinstance(r.get("run_id"), str) or not r["run_id"].strip() for r in records):
-        raise ValueError("manifest must contain nonempty run IDs")
-    expected = {r["run_id"] for r in records}
-    if len(expected) != len(records):
-        raise ValueError("duplicate manifest run IDs")
-    actual = {r["run_id"] for r in rows}
-    missing, extra = sorted(expected-actual), sorted(actual-expected)
-    mismatch = None
-    if not missing and not extra:
-        try:
-            check_manifest(rows, path)
-        except ValueError as exc:
-            mismatch = str(exc)
-    blocked = sorted(r["run_id"] for r in records if r.get("status") == "blocked")
-    return {"checked": True, "status": "incomplete" if missing or extra or mismatch or blocked else "complete",
-            "planned_n": len(records), "provided_n": len(rows), "missing_run_ids": missing,
-            "extra_run_ids": extra, "trace_error": mismatch,
-            "blocked_plan_run_ids": blocked}
-
-
 def sha256(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -163,6 +140,10 @@ def build_report(input_path, output, manifest=None, pairs=None, replicates=2000,
     write_json(output / "curve_audit.json", curve_audit)
     write_csv(output / "risk_coverage.csv", curves, list(GROUP_FIELDS)+["curve_mode", "coverage", "risk", "accepted", "score_threshold"])
     write_json(output / "manifest_audit.json", audit)
+    write_csv(output / "manifest_coverage.csv", [{**g["slice"], **{k: v for k, v in g.items() if k != "slice"}}
+                                               for g in audit["groups"]],
+              list(GROUP_FIELDS) + ["planned_n", "provided_n", "ok_n", "failed_n", "missing_n", "extra_n",
+                                    "trace_mismatch_n", "blocked_n", "completion_rate"])
     write_json(output / "failures.json", [{k: r[k] for k in ("run_id", "raw_log_id", "base_question_id", "method", "status")} for r in rows if r["status"] != "ok"])
     figure_status = "not_requested"
     if figures:
@@ -179,6 +160,7 @@ def build_report(input_path, output, manifest=None, pairs=None, replicates=2000,
     notes = [f"# Evaluation bundle: {label}", "", "软件样例不得作为研究结果。pilot 为探索结果；frozen-test 标签不替代团队冻结审核。", "",
              f"- 输入记录：{len(rows)}；切片：{len(summary['groups'])}。",
              f"- Manifest：{audit['status']}。未核对时，planned_n 仅表示输入记录数。",
+             "- 计划分母见 manifest_coverage.csv；整组漏跑也会显示。complete 仅表示记录齐全且来源匹配；失败次数单列，不表示全部运行成功。",
              f"- 比较不可用：{sum(c['status'] != 'ok' for c in comparisons)}；详情见 comparisons.json。",
              f"- 图片状态：{figure_status}。曲线坐标始终保存为 CSV。", "",
              "主表：summary.csv；差值/CI：comparisons.csv；配对缺失和失败排除：comparisons.json；复本诊断：replica.json；曲线不可用原因：curve_audit.json；来源哈希：provenance.json。",

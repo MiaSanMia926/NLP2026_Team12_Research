@@ -60,3 +60,5 @@ A 需提供题目、划分与可信标签；B 提供候选/得分、门控权重
 真实汇总须覆盖所选 manifest 的全部 run：失败和未完成不得无声省略。metrics 的 --manifest 可核对 ID 和版本；不提供 manifest 时，planned_n 只表示当前输入记录数。
 
 report 还列出 missing/extra/blocked run ID，保存诊断并返回非零；不会自动构造未运行预测。输出包不得覆盖非空旧目录。默认 B7−B5，显式 --compare 可定义探索性消融比较。software-selfcheck/pilot/frozen-test 标签均为调用者声明，须与原始数据/运行/冻结记录核对。
+
+2026-11-04 补充：manifest 必须提供完整运行身份和状态，不能只给 ID。部分批次也逐项核对共同 run 的来源字段，全部差异存于 trace_mismatches。`manifest_coverage.csv` 从计划构造切片，保留完全缺失的条件；其完成率为身份匹配成功数/计划数，区别于 summary 的成功数/已交记录数。错配结果不计入计划成功数；extra 没有计划分母。审计 complete 表示记录齐全且来源匹配、无 blocked，仍须单列失败数，不能据此声称全部运行成功。指标主表保留传入记录，不因错配自动修正/删行，审计不通过的包只能用于排错。

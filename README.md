@@ -29,3 +29,5 @@ python -m integration_smoke.run --output-dir artifacts/selfcheck/demo --question
 生成的数据、日志和图表保存在输出目录，不纳入源码提交。仓库中的合成样例用于检查程序，不能作为模型实验结果。
 
 [评价与绘图用法](evaluation/README.md) · [离线联调用法](integration_smoke/README.md) · [评价协议](evaluation/protocol.md)
+
+C 的真实实验验收与本人复核步骤见 [交接说明](docs/c_handoff.md)。传入 `--manifest` 可输出按原计划分母统计的覆盖表，并检查漏跑、额外任务和来源错配。

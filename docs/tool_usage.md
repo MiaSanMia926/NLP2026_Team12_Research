@@ -13,3 +13,7 @@
 | 2026-10-30 / C 软件交付 | Codex（AI 辅助）；nature-writing 技能 | 本次对话；本地 Python 3.13.9；具体模型版本未单独记录 | 编写汇总入口、扩展消融/H3 清单、修复输入转换、补充针对性测试与交接资料；依现有协议起草英文评价章节 | evaluation/report.py、tests/test_reporting.py、docs/c_handoff.md 等，详见 docs/c_review_submission.md | AI 实际执行软件验证，结果见 verification.md；C 本人理解/复核与 A/B/D 交叉审核尚待完成，不宣称已有人审核或真实模型实验 |
 
 模型实验开始后补充完整模型 ID/revision、获取方式、解码参数和依赖锁定。第三方代码引入时新增相应许可与修改说明，不在目前尚未引入实现时虚构依赖清单。
+
+| 日期/阶段 | 实际工具或模型 | 来源/版本 | 具体用途 | 采用产物 | 人工核验/责任人 |
+|---|---|---|---|---|---|
+| 2026-11-04 / C 验收加固 | Codex（AI 辅助）、Python 3.13.9 | 本次对话、仓库 evaluation-metrics/3ee1e9d | 修复部分批次来源核对和 ID-only 清单问题，补计划覆盖分母、11 项回归与 CI；更新本人复核建议 | evaluation/manifest.py、report.py、metrics.py、tests/test_manifest.py、.github/workflows/evaluation.yml、交接与协议说明 | AI 已实际执行 74 项软件测试和 fixture 绘图；详见 evaluation/verification.md。C 本人手算、A/B/D 真实交接与人工签收待完成；无真实模型效果主张 |

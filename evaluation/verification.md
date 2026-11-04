@@ -69,3 +69,18 @@ C 交付的是评价定义、接口与工具。真实数据、候选得分定义
 ### 尚待外部交接
 
 A 的真实数据/标签复核；B 的实际模型、合法 score、三消融开关/独立工件与 dev 阈值；D 的真实日志/失败/成本；10 题真实闭环及 pilot 表图。没有冒记这些已完成，也没有向远端推送或代发消息。
+
+## 2026-11-04：真实批次接入前的清单验收加固
+
+基于远端 evaluation-metrics 的 `3ee1e9d`，在隔离目录修改；原本地工作区的未提交内容未混入本次交付。Codex 辅助实现并运行软件核验，环境 Python 3.13.9。
+
+- 修复只有 run_id 的清单仍可通过来源验收的问题：现在要求完整身份与状态，并复用预测 schema 的字段类型/格式约束。
+- 修复有 missing/extra 时跳过所有 trace 检查的问题：共同 run 的每个差异都保存，诊断不再只保留第一处。
+- metrics/report 共用审计逻辑，二者均拒绝 blocked 计划。scheduler 的 blocked/null metadata recipe 保持可诊断，不伪造 recipe。
+- 新增 manifest_coverage.csv 与审计 groups：以计划构建全部条件，整组漏跑也显示；来源错配不计成功，extra-only 分母为空。审计 complete 与全部推理成功分开。
+- 74/74 项单元/集成测试通过，原 63 项加 11 项验收回归。覆盖 ID-only 清单、漏跑并存多字段错配、完全缺失切片、失败/blocked、额外切片、类型错误、计数恒等式、确定性、CSV/哈希和两个 CLI 的一致退出状态。
+- 本地执行 CI 中的 fixture 绘图命令：8 条样例生成 2 张 publication figures，23 个结果文件哈希全部核对。未修改图形呈现代码，本轮仅验证渲染可执行，不追加新的视觉质量结论。
+- 端到端执行 `python -m integration_smoke.run --output-dir artifacts/selfcheck/c_acceptance_20261104 --questions 12 --replicates 40 --no-figures`：12 个虚构基础题、288 份 public inputs、1,152 条规则后端记录；29 次注入失败恢复，重启跳过全部成功记录；全量/展示 manifest 均 complete，6 项故障探针通过。展示比较仍用 2,000 次 bootstrap，四类原数值输出重算一致；新增 manifest_audit.json 与 manifest_coverage.csv 也逐字节一致。三个评价包全部文件哈希复核通过，计划计数恒等式逐组通过。这是规则软件联调，不是 B0–B7 或模型性能结果。
+- 所有 Python 源码与 JSON schema 完成语法解析，新增工作流 YAML 已解析；工作流配置 Python 3.10/3.13、Windows/Linux 核心测试和独立可选绘图检查。远端是否运行及结果以 Actions 为准，不将本地 3.13 测试冒记为全平台通过。
+
+本轮无真实 LLM 推理、付费 API、真实 test 结果或人工签收。C 本人可立即完成的手算、真实 10 题验收及解释准备见 docs/c_handoff.md；建议项未冒记为本人已完成贡献。原记录中的“未推送”属于各历史轮次；本轮用户已授权提交对应分支。

@@ -214,16 +214,14 @@ def grouped_summaries(rows):
 
 
 def check_manifest(rows, manifest_path):
-    manifest = [json.loads(line) for line in Path(manifest_path).read_text(encoding="utf-8-sig").splitlines() if line.strip()]
-    expected = {r["run_id"]: r for r in manifest}
-    actual = {r["run_id"]: r for r in rows}
-    if len(expected) != len(manifest) or len(actual) != len(rows) or set(expected) != set(actual):
-        raise ValueError("prediction/manifest run IDs missing, extra or duplicated")
-    trace_fields = tuple(dict.fromkeys(GROUP_FIELDS + ("base_question_id", "family_id", "pair_id")))
-    for run_id, row in actual.items():
-        for field in trace_fields:
-            if field in expected[run_id] and expected[run_id][field] != row[field]:
-                raise ValueError(f"manifest trace mismatch: {run_id}/{field}")
+    # Lazy import keeps the public metrics entry point compatible.
+    try:
+        from .manifest import audit_manifest
+    except ImportError:
+        from manifest import audit_manifest
+    audit = audit_manifest(rows, manifest_path)
+    if audit["status"] != "complete":
+        raise ValueError(audit["trace_error"] or "prediction/manifest run IDs missing, extra or plan blocked")
 
 
 def main():
