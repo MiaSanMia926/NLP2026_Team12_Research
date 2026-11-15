@@ -3,8 +3,7 @@
 本模块是为 Track C 研究项目「来源依赖信息不完备时 RAG 的证据去重与选择性作答」
 单独新建的可视化模块，目标是把结果图做到可直接放进 ACL/CCF 论文的水准。
 
-**它是一个独立模块，不修改、不依赖 `evaluation/` 目录里的任何现有代码**，
-你原有的绘图脚本和产物完全不受影响，可以放心使用，也可以随时删掉本目录而不影响主工程。
+论文图复用 `evaluation/` 的指标、配对 bootstrap 和重合曲线判定，绘图入口为 `paper_viz/paper_figures.py`。
 
 ---
 
@@ -31,21 +30,20 @@ paper_viz/
 在 PowerShell 中执行：
 
 ```powershell
-python -m pip install matplotlib==3.10.6
+python -m pip install -r requirements-plot.txt
 ```
 
 安装一次即可，之后重复运行不需要再装。无需任何付费软件或在线服务。
 
 ---
 
-## 3. 运行命令（保姆级）
+## 3. 复现五张主图
 
-确认数据文件存在后，在 PowerShell 中执行下面这一整行（路径可以直接照抄）：
+在仓库根目录运行。第一条命令生成合成预测，第二条命令绘图。已有评测输出时，可直接把它传给绘图命令。
 
 ```powershell
-python "C:\Users\czh99\Desktop\NLP\paper_viz\paper_figures.py" `
-  "C:\Users\czh99\Desktop\NLP\artifacts\selfcheck\ab_to_c_20261031\scored_predictions.jsonl" `
-  --output-dir "C:\Users\czh99\Desktop\NLP\paper_viz\figures"
+python -m integration_smoke.run --output-dir artifacts/selfcheck/paper_viz_demo --questions 12 --replicates 200 --no-figures
+python paper_viz/paper_figures.py artifacts/selfcheck/paper_viz_demo/scored_predictions.jsonl --split dev --output-dir artifacts/selfcheck/paper_viz_demo_figures
 ```
 
 参数说明：
@@ -54,6 +52,9 @@ python "C:\Users\czh99\Desktop\NLP\paper_viz\paper_figures.py" `
 - `--output-dir`：图输出目录，不存在会自动创建。
 - 可选 `--length-policy`：默认 `natural_length`，如需固定 token 预算结果可改为
   `--length-policy fixed_token_budget`。
+- 可选 `--split`：五张图统一使用同一划分。默认优先选 `test`，其次 `dev`，最后使用输入中的首个划分。
+  当前示例的 `dev` 自然长度切片包含 384 条成功记录、8 道基础题，图内标记为 `Synthetic demo`。
+  输入包含多个模型、数据版本、随机种子或同一方法的多个配置时，先按单个可比较切片准备 JSONL。
 
 运行结束会打印一个 JSON，列出本次写出的全部文件，`figures_written` 应为 10。
 
@@ -63,11 +64,11 @@ python "C:\Users\czh99\Desktop\NLP\paper_viz\paper_figures.py" `
 
 | 图 | 文件 | 对应研究问题 | 内容与职责 |
 |---|---|---|---|
-| 图1 | `fig1_risk_coverage` | 总览 | 风险-覆盖（risk-coverage）阶梯曲线，两面板分别为原始证据与同源复本，图级图例标注每方法 AURC |
-| 图2 | `fig2_metadata` | H2（主比较） | 元数据 complete / missing / incorrect 三态下的 coverage 与 selective risk，带 95% 聚类 bootstrap 置信区间 |
-| 图3 | `fig3_dumbbell` | H1 | 同一批 base question 从原始证据到同源复本的配对哑铃图，直观显示复本如何改变 coverage 与 risk |
-| 图4 | `fig4_forest` | 方法对比 | Gate 相对 Vote 在四个指标上的差值森林图，右侧附「估计值 [置信区间]」数值列 |
-| 图5 | `fig5_retention` | H3 | 独立同义/互补证据保留率，以及选择性作答的两类错误（误答、误拒） |
+| 图1 | `fig1_risk_coverage` | 总览 | 上方对照原始证据与同源复本的经验阶梯曲线，下方列出两条件的 AURC 与描述性差值。完全重合的曲线共用一条线 |
+| 图2 | `fig2_metadata` | H2（主比较） | 三种元数据状态的覆盖率与选择性风险，展示点估计、95% 聚类 bootstrap 区间和数值 |
+| 图3 | `fig3_dumbbell` | H1 | 每种方法的原始证据和同源复本点估计用线相连，各显示条件内区间，右侧标注描述性百分点变化 |
+| 图4 | `fig4_forest` | 方法对比 | Gate−Vote（真实 B 系列采用 B7−B5）的配对差值森林图，估计值和区间位于绘图区外 |
+| 图5 | `fig5_retention` | H3 | 左侧附保留/应保留证据组数，右侧列出误答率、误拒率各自的适用预测数 |
 
 每张图都按「一个研究问题一张图、一个面板只回答一个问题」的原则组织，
 避免了原来多图信息重复、读者要自己拼图的问题。
@@ -78,30 +79,20 @@ python "C:\Users\czh99\Desktop\NLP\paper_viz\paper_figures.py" `
 
 专业论文图的核心要求是**跨图一致**：同一个东西在所有图里长得一样，读者只需学一次。
 
-- **方法 → 颜色（全图统一）**，采用色盲友好的 Okabe-Ito 配色：
-  - Vote：蓝色 `#0072B2`
-  - Text dedup.（文本去重）：朱红 `#D55E00`
-  - Source count（来源计数）：绿色 `#009E73`
-  - Gate（主方法）：黑色 `#1A1A1A`，并加粗强调，让读者第一眼锁定主方法
-- **复本条件 → 形状 + 线型（全图统一）**：
-  - no_replica：圆形 + 实线
-  - same_source_replica：方形 + 虚线
-  - independent_support：三角 + 点线
-  - complementary_support：菱形 + 点划线
-- 颜色和形状是**两条独立通道**：黑白打印时靠形状/线型仍能区分，色盲读者也不会丢失信息。
+- 主图用深青 `#006C68` 与浅青行底标出 Gate/B7。Vote、Text dedup. 和 Source count 分别使用蓝色、赭色和紫色。
+- 风险曲线同时用颜色和线型区分方法。元数据图同时用颜色和点形区分方法，哑铃图用实心圆和空心方区分证据条件。
+- 缺失或未定义的估计标为 `NA`，比例图的 `NA` 放在 100% 刻度以外的注记区域。
 
 ---
 
 ## 6. 排版与导出规范（对齐 ACL/CCF 要求）
 
-- 物理尺寸按 ACL 版心固定：单栏 77 mm（约 3.03 英寸）、双栏 160 mm（约 6.30 英寸），
-  放进论文不会出现缩放后字体忽大忽小的问题。
-- 字体统一使用 Times New Roman 衬线体（与论文正文一致），数学符号用 STIX；
-  基础字号 8 pt、刻度 7.5 pt、面板标签 9 pt 加粗。
+- 五张主图保留项目既定的 160 mm 双栏宽度，高度随方法数和标注空间调整。
+- 主标题使用 DejaVu Serif，图内使用 Arial 或系统无衬线回退字体，面板字母为 9 pt。标题区显示数据划分、长度策略和基础题总数，各比例的分母以对应面板的定义为准。
 - 每张图同时导出：
   - **PDF 矢量图**：论文排版用，任意缩放不模糊；`pdf.fonttype=42`，文字可被正确检索；
   - **600 dpi PNG**：预览、贴 PPT 或不支持矢量的系统用。
-- 全框细线、细网格，不使用 `bbox_inches='tight'`（避免实际尺寸漂移），所有留白都在脚本里精确控制。
+- 主图使用细轴线和浅网格。导出保留固定宽度。设置 `NATURE_FIGURE_QA_DIR` 后可执行渲染后的面板对齐检查。
 
 ---
 
@@ -113,6 +104,13 @@ python "C:\Users\czh99\Desktop\NLP\paper_viz\paper_figures.py" `
 - 数据本身没有不确定性信息的地方，**不会凭空画误差棒**，也不做平滑处理。
 - 完全拒答导致 risk 无定义（如 Gate 在 missing 状态）时，该点按缺失处理，不编造数值。
 - 脚本只报告差值与置信区间，不自动写「显著」之类的结论性措辞，结论留给正文。
+
+### GitHub 参考
+
+- 用 AURC 读取选择性分类的风险—覆盖率曲线。阶梯端点、分数并列规则和面积沿用本项目的 `evaluation.metrics.risk_curve`。[fd-shifts](https://github.com/IML-DKFZ/fd-shifts/blob/main/docs/publications/neurips_2024.md)
+- 元数据图采用分组错位的点与区间，各状态保留独立的比较位置。[seaborn 分组点和区间](https://seaborn.pydata.org/tutorial/objects_interface)
+- 森林图为区间和值分别留出布局空间，图例与数据标记分开摆放。[Matplotlib GridSpec](https://matplotlib.org/stable/gallery/subplots_axes_and_figures/gridspec_multicolumn.html) · [Scientific Visualization 示例](https://github.com/rougier/scientific-visualization-book/tree/master/code/ornaments)
+- 细轴线、轻网格、无边框图例与固定尺寸样式集中配置。[SciencePlots 科研图样式](https://github.com/garrettj403/SciencePlots/blob/master/src/scienceplots/styles/science.mplstyle)
 
 ---
 
