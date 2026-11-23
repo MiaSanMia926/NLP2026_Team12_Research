@@ -8,6 +8,7 @@
 
 | 目录 | 内容 |
 |---|---|
+| `baselines/` | 模型 runner、基线、B7 门控与日志 |
 | `evaluation/` | 输入校验、指标、配对 bootstrap、运行清单和绘图 |
 | `schemas/` | 问题、公开输入和预测结果的数据格式 |
 | `integration_smoke/` | 合成数据生成、规则后端和端到端联调 |
@@ -31,3 +32,5 @@ python -m integration_smoke.run --output-dir artifacts/selfcheck/demo --question
 [评价与绘图用法](evaluation/README.md) · [离线联调用法](integration_smoke/README.md) · [评价协议](evaluation/protocol.md)
 
 C 的真实实验验收与本人复核步骤见 [交接说明](docs/c_handoff.md)。传入 `--manifest` 可输出按原计划分母统计的覆盖表，并检查漏跑、额外任务和来源错配。
+
+B 组实验入口、模型配置、pilot 和门控校准见 [B 组运行与交接](docs/b_runbook.md)。

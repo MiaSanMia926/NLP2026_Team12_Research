@@ -38,3 +38,8 @@ runs/raw/
 
 # Generated software fixtures, never research results
 /artifacts/selfcheck/
+
+# B runner experiment outputs and local configuration
+/runs/
+/results/
+/configs/*.actual.json

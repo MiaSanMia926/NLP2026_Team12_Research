@@ -27,7 +27,7 @@ def digest(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,ensure_ascii=False,separators=(",",":"),allow_nan=False).encode("utf-8")).hexdigest()
 
 
-def make_manifest(questions,config,methods=None,include_oracle=False,include_ablations=False,replica_conditions=None):
+def make_manifest(questions,config,methods=None,include_oracle=False,include_ablations=False,replica_conditions=None,collect_gate_features=False):
     required=("experiment_id","model","model_revision","prompt_template_hash","tokenizer_id","generation","seed","position_seed")
     if any(k not in config for k in required):
         raise ValueError("model configuration requires: "+", ".join(required))
@@ -65,12 +65,15 @@ def make_manifest(questions,config,methods=None,include_oracle=False,include_abl
                 blocked.append("missing_metadata_error_recipe")
             if length=="fixed_token_budget" and budget is None:
                 blocked.append("missing_token_budget")
+            if collect_gate_features and q["split"] == "test":
+                blocked.append("gate_features_require_train_or_dev")
             method_config = method_configs.get(method, {})
             if not isinstance(method_config, dict):
                 raise ValueError(f"method_configs.{method} must be an object")
             if method in ABLATIONS:
                 if method_config.get("disabled_features") != [ABLATIONS[method]]:
                     blocked.append("missing_or_incorrect_ablation_switch")
+            if method in ABLATIONS and not collect_gate_features:
                 gate = method_config.get("gate", {})
                 if not isinstance(gate, dict):
                     raise ValueError("gate must be an object")
@@ -111,11 +114,12 @@ def main():
     parser.add_argument("--include-oracle",action="store_true")
     parser.add_argument("--include-ablations",action="store_true")
     parser.add_argument("--replica-conditions",nargs="+",help="explicit H1/H3 panels; A must supply corresponding evidence variants")
+    parser.add_argument("--collect-gate-features",action="store_true",help="allow unfitted ablations for train/dev feature collection")
     args=parser.parse_args()
     try:
         questions=load_records(args.questions,"question")
         config=json.loads(Path(args.config).read_text(encoding="utf-8"))
-        rows=make_manifest(questions,config,args.methods,args.include_oracle,args.include_ablations,args.replica_conditions)
+        rows=make_manifest(questions,config,args.methods,args.include_oracle,args.include_ablations,args.replica_conditions,args.collect_gate_features)
     except (OSError,ValueError,KeyError) as exc:
         print(str(exc),file=sys.stderr)
         return 2
