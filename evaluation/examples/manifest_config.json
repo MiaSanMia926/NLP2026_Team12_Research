@@ -1,0 +1,13 @@
+{
+  "experiment_id": "software-test-only",
+  "model": "fixture-model-NOT-A-REAL-RUN",
+  "model_revision": "fixture-revision",
+  "prompt_template_hash": "194713ad972b9125a463802fa203cc68e814e7b681bece09a1975df5efd0fa11",
+  "tokenizer_id": "fixture-tokenizer",
+  "generation": {
+    "temperature": 0
+  },
+  "seed": 20261019,
+  "position_seed": 0,
+  "fixed_token_budget": 4096
+}

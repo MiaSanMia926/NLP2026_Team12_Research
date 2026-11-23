@@ -1,0 +1,31 @@
+{
+  "experiment_id": "",
+  "backend": "transformers",
+  "checkpoint": "",
+  "device": "cpu",
+  "model": "",
+  "model_revision": "",
+  "tokenizer_id": "",
+  "generation": {"temperature": 0, "max_tokens": 256},
+  "seed": 20261019,
+  "position_seed": 0,
+  "fixed_token_budget": null,
+  "max_attempts": 2,
+  "method_configs": {
+    "B3": {
+      "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+      "embedding_revision": "c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+      "embedding_device": "cpu",
+      "semantic_threshold": 0.85
+    },
+    "B5": {
+      "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+      "embedding_revision": "c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+      "embedding_device": "cpu",
+      "semantic_threshold": 0.85
+    },
+    "B7_no_source": {"disabled_features": ["source"]},
+    "B7_no_unknown": {"disabled_features": ["unknown"]},
+    "B7_no_conflict": {"disabled_features": ["conflict"]}
+  }
+}

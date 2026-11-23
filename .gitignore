@@ -27,3 +27,19 @@ Thumbs.db
 *.ckpt
 *.pt
 *.pth
+
+# Local rendering intermediates
+.proposal_render/
+
+# Large local experiment logs and caches (publish indexes instead)
+artifacts/raw/
+runs/raw/
+.cache/
+
+# Generated software fixtures, never research results
+/artifacts/selfcheck/
+
+# B runner experiment outputs and local configuration
+/runs/
+/results/
+/configs/*.actual.json
